@@ -1,38 +1,41 @@
 <?php
-// Front controller / router
-define('BASE_PATH', dirname(__DIR__));
-
-require_once BASE_PATH . '/config/config.php';
-require_once BASE_PATH . '/app/core/Database.php';
-require_once BASE_PATH . '/app/controllers/MahasiswaController.php';
-
-// simple router using ?url=...
-$url = $_GET['url'] ?? 'mahasiswa';
-$url = trim($url, '/');
-$segments = explode('/', $url);
-
-$controller = $segments[0] ?: 'mahasiswa';
-$method = $segments[1] ?? 'index';
-$param = $segments[2] ?? null;
-
-$controllerName = ucfirst($controller) . 'Controller';
-
-if (!class_exists($controllerName)) {
-    http_response_code(404);
-    echo "Controller $controllerName tidak ditemukan.";
-    exit;
-}
-
-$c = new $controllerName();
-
-if (!method_exists($c, $method)) {
-    http_response_code(404);
-    echo "Method $method tidak ditemukan pada controller $controllerName.";
-    exit;
-}
-
-if ($param) {
-    $c->$method($param);
-} else {
-    $c->$method();
-}
+// $data['mahasiswa'] expected
+?>
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Data Mahasiswa</title>
+    <link rel="stylesheet" href="/crud-mvc-mahasiswa/public/assets/style.css">
+</head>
+<body>
+<div class="container">
+    <h1>Data Mahasiswa</h1>
+    <a class="btn" href="/crud-mvc-mahasiswa/public/mahasiswa/tambah">+ Tambah Data</a>
+    <table>
+        <thead>
+            <tr><th>ID</th><th>Nama</th><th>NIM</th><th>Jurusan</th><th>Aksi</th></tr>
+        </thead>
+        <tbody>
+        <?php if (!empty($data['mahasiswa'])): ?>
+            <?php foreach ($data['mahasiswa'] as $mhs): ?>
+            <tr>
+                <td><?= htmlspecialchars($mhs['id']); ?></td>
+                <td><?= htmlspecialchars($mhs['nama']); ?></td>
+                <td><?= htmlspecialchars($mhs['nim']); ?></td>
+                <td><?= htmlspecialchars($mhs['jurusan']); ?></td>
+                <td>
+                    <a href="/crud-mvc-mahasiswa/public/mahasiswa/detail/<?= $mhs['id']; ?>">Detail</a> |
+                    <a href="/crud-mvc-mahasiswa/public/mahasiswa/edit/<?= $mhs['id']; ?>">Edit</a> |
+                    <a href="/crud-mvc-mahasiswa/public/mahasiswa/hapus/<?= $mhs['id']; ?>" onclick="return confirm('Yakin hapus?')">Hapus</a>
+                </td>
+            </tr>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <tr><td colspan="5">Belum ada data.</td></tr>
+        <?php endif; ?>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
